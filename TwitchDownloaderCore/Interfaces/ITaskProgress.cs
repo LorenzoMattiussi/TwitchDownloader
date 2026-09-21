@@ -9,5 +9,11 @@ namespace TwitchDownloaderCore.Interfaces
         void SetTemplateStatus([StringSyntax(StringSyntaxAttribute.CompositeFormat)] string statusTemplate, int initialPercent, TimeSpan initialTime1, TimeSpan initialTime2);
         void ReportProgress(int percent);
         void ReportProgress(int percent, TimeSpan time1, TimeSpan time2);
+
+        /// <summary>Reports progress together with an extra status detail (e.g. live download speed).</summary>
+        void ReportProgress(int percent, string detail)
+        {
+            ReportProgress(percent);
+        }
     }
 }

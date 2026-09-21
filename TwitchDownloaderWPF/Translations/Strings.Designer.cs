@@ -77,6 +77,12 @@ namespace TwitchDownloaderWPF.Translations {
             }
         }
         
+        public static string ExtractVodIds {
+            get {
+                return ResourceManager.GetString("ExtractVodIds", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to You&apos;ve selected an alpha channel (transparency) for a container/codec that does not support it. Remove transparency or encode with MOV + RLE/PRORES or WEBM + VP8/VP9.
         /// </summary>

@@ -36,5 +36,7 @@ namespace TwitchDownloaderCore.Models
         public void ReportProgress(int percent) { }
 
         public void ReportProgress(int percent, TimeSpan time1, TimeSpan time2) { }
+
+        public void ReportProgress(int percent, string detail) { }
     }
 }

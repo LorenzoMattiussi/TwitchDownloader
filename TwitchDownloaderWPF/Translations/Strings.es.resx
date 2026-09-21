@@ -1072,4 +1072,7 @@
   <data name="FatalErrorMessage" xml:space="preserve">
     <value>{0} can resume but may be unstable. Do you want to resume?</value><comment>{0} is the name of the application.</comment>
   </data>
+  <data name="ExtractVodIds" xml:space="preserve">
+    <value>Extraer IDs de VOD</value>
+  </data>
 </root>

@@ -1071,4 +1071,7 @@
   <data name="FatalErrorMessage" xml:space="preserve">
     <value>{0} 可以復原，但可能不穩定。確定要復原嗎？</value><comment>{0} is the name of the application.</comment>
   </data>
+  <data name="ExtractVodIds" xml:space="preserve">
+    <value>擷取 VOD ID</value>
+  </data>
 </root>

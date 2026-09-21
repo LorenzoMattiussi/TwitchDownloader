@@ -679,6 +679,7 @@ namespace TwitchDownloaderWPF
                         StvEmotes = CheckStvEmbed.IsChecked.GetValueOrDefault(),
                         TimeFormat = TimestampFormat.Relative,
                         Id = taskData.Id,
+                        DownloadThreads = Settings.Default.ChatDownloadThreads,
                         TrimBeginning = false,
                         TrimEnding = false,
                         FileCollisionCallback = HandleFileCollisionCallback,

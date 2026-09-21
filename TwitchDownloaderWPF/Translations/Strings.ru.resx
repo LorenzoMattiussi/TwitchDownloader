@@ -1073,4 +1073,7 @@
     <value>{0} может возобновить работу, но может быть нестабильным. Хотите возобновить?</value>
 	<comment>{0} is the name of the application.</comment>
   </data>
+  <data name="ExtractVodIds" xml:space="preserve">
+    <value>Извлечь ID видео</value>
+  </data>
 </root>

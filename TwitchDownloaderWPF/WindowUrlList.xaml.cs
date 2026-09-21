@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using TwitchDownloaderCore;
+using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
@@ -165,6 +166,47 @@ namespace TwitchDownloaderWPF
                 this.Close();
 
             btnQueue.IsEnabled = true;
+        }
+
+        private void btnExtractIds_Click(object sender, RoutedEventArgs e)
+        {
+            var lines = textList.Text.Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+
+            var ids = new List<string>(lines.Length);
+            foreach (var line in lines)
+            {
+                if (TryExtractVideoId(line, out var id))
+                {
+                    ids.Add(id);
+                }
+            }
+
+            if (ids.Count == 0)
+            {
+                MessageBox.Show(this, Translations.Strings.UnableToParseInputsMessage, Translations.Strings.UnableToParseInputs, MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            textList.Text = string.Join(Environment.NewLine, ids);
+        }
+
+        private static bool TryExtractVideoId(string line, out string id)
+        {
+            // Plain VOD/clip URLs and bare ids are handled as before
+            id = PageChatDownload.ValidateUrl(line);
+            if (!string.IsNullOrWhiteSpace(id))
+            {
+                return true;
+            }
+
+            var match = IdParse.MatchVideoIdFromFileName(line);
+            if (match is { Success: true })
+            {
+                id = match.Value;
+                return true;
+            }
+
+            return false;
         }
 
         private void Window_OnSourceInitialized(object sender, EventArgs e)

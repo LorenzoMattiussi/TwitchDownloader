@@ -1,9 +1,7 @@
 ﻿using System.Buffers;
 using System.IO.Compression;
 using System.Text;
-using System.Text.Encodings.Web;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
@@ -12,12 +10,7 @@ namespace TwitchDownloaderCore.Chat
 {
     public static class ChatJson
     {
-        private static readonly JsonSerializerOptions _jsonSerializerOptions = new()
-        {
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-            NumberHandling = JsonNumberHandling.AllowReadingFromString,
-            AllowTrailingCommas = true
-        };
+        private static readonly JsonSerializerOptions _jsonSerializerOptions = ChatSerialization.Options;
 
         /// <summary>
         /// Asynchronously deserializes a chat json file.
@@ -247,6 +240,11 @@ namespace TwitchDownloaderCore.Chat
             {
                 foreach (var comment in chatRoot.comments)
                 {
+                    if (comment.message.body.AsSpan().IndexOfAny("123456789") < 0)
+                    {
+                        continue;
+                    }
+
                     var bitMatch = TwitchRegex.BitsRegex.Match(comment.message.body);
                     if (bitMatch.Success && int.TryParse(bitMatch.ValueSpan, out var result))
                     {

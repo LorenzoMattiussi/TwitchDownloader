@@ -127,6 +127,29 @@ namespace TwitchDownloaderCLI.Tools
             }
         }
 
+        public void ReportProgress(int percent, string detail)
+        {
+            if ((_logLevel & LogLevel.Status) == 0) return;
+
+            lock (_writeLock)
+            {
+                if (!_statusIsTemplate)
+                {
+                    return;
+                }
+
+                var status = string.Format(_status, percent);
+                if (!string.IsNullOrEmpty(detail))
+                {
+                    status = $"{status} - {detail}";
+                }
+
+                _lastStatusLength = WriteSameLineMessage(STATUS_PREAMBLE, status, _lastStatusLength);
+                _lastWriteHadNewLine = false;
+                _lastPercent = percent;
+            }
+        }
+
         private int WriteSameLineMessage(string preamble, string message, int previousMessageLength)
         {
             if (!_lastWriteHadNewLine)

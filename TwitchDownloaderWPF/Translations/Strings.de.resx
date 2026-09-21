@@ -1022,4 +1022,7 @@ https://www.twitch.tv/videos/470741744
   <value>{0} kann fortgesetzt werden, könnte aber instabil sein. Möchtest du fortfahren?</value>
   <comment>{0} is the name of the application.</comment>
   </data>
+  <data name="ExtractVodIds" xml:space="preserve">
+    <value>VOD-IDs extrahieren</value>
+  </data>
 </root>

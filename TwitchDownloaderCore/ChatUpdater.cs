@@ -88,7 +88,7 @@ namespace TwitchDownloaderCore
             Stream outputStream = _updateOptions.Compression switch
             {
                 ChatCompression.None => outputFs,
-                ChatCompression.Gzip => new GZipStream(outputFs, CompressionLevel.SmallestSize),
+                ChatCompression.Gzip => new GZipStream(outputFs, CompressionLevel.Optimal),
                 _ => throw new NotSupportedException($"{_updateOptions.Compression} is not a supported chat compression.")
             };
 

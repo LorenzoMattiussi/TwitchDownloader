@@ -101,6 +101,31 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Equal(expectedId, match.Value);
         }
 
+        [Theory]
+        [InlineData("[2026-09-18]_Tumblurr_2877671523_REACTIONS FIFA 27 PACK RACE THE GROUNDS_vod.mp4", "2877671523")]
+        [InlineData("[2026-09-18]_zackrawrr_2877570828_[DROPS ON] UNBANNED WOW FOREVER BETA TODAY BIG DAY HUGE DRAMA  TODAY NEW GAMES BIG NEWS  REACTS @asmongold247_vod.mp4", "2877570828")]
+        [InlineData("[2026-09-19]_ControCalcio___2878378083_ROMA INTER CALDO! CASO ARBITRI INTER DE ROSSI ATTACCA FAINA E SCISCIONE!_vod.mp4", "2878378083")]
+        [InlineData("[2026-09-19]_ControCalcio___2878725254__vod.mp4", "2878725254")]
+        [InlineData("[2026-09-19]_DanieleBrogna_2878458888_ROMA - INTER - DIRETTA PARTITA - LIVE REACTION DI UN MILANISTA_vod.mp4", "2878458888")]
+        [InlineData("[2026-09-19]_TheRealMarzaa_2878629863_TORNEO P.M. CON GIANKO_vod.mp4", "2878629863")]
+        [InlineData("2877671523", "2877671523")]
+        [InlineData("https://www.twitch.tv/videos/2877671523", "2877671523")]
+        public void CorrectlyParsesFileNameVodId(string fileName, string expectedId)
+        {
+            var match = IdParse.MatchVideoIdFromFileName(fileName);
+
+            Assert.NotNull(match);
+            Assert.Equal(expectedId, match.Value);
+        }
+
+        [Fact]
+        public void DoesNotParseFileNameWithoutVodId()
+        {
+            var match = IdParse.MatchVideoIdFromFileName("just some random file name.mp4");
+
+            Assert.Null(match);
+        }
+
         [Fact]
         public void DoesNotParseGarbageVodId()
         {

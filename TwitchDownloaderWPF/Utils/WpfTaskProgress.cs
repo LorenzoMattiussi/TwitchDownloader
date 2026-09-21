@@ -128,6 +128,28 @@ namespace TwitchDownloaderWPF.Utils
             }
         }
 
+        public void ReportProgress(int percent, string detail)
+        {
+            lock (_writeLock)
+            {
+                _handlePercent(percent);
+                _lastPercent = percent;
+
+                if (!_statusIsTemplate)
+                {
+                    return;
+                }
+
+                var status = string.Format(_status, percent);
+                if (!string.IsNullOrEmpty(detail))
+                {
+                    status = $"{status} - {detail}";
+                }
+
+                _handleStatus?.Invoke(status);
+            }
+        }
+
         public void LogVerbose(string logMessage)
         {
             if ((_logLevel & LogLevel.Verbose) == 0) return;
