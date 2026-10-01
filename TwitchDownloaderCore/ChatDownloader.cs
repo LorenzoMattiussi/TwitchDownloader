@@ -694,9 +694,10 @@ namespace TwitchDownloaderCore
 
             // This is the exact same process as in ChatUpdater.cs but not in a task oriented manner
             // TODO: Combine this with ChatUpdater in a different file
-            // The emote, badge, and bit caches are independent, so fetch them concurrently (as ChatUpdater does)
+            // The emote, badge, bit, and GIF sources are independent, so fetch them concurrently (as ChatUpdater does)
+            const int FETCH_STAGES = 5;
             var completedStages = 0;
-            void ReportStageComplete() => ReportFetchProgress(Interlocked.Increment(ref completedStages) * 25);
+            void ReportStageComplete() => ReportFetchProgress(Interlocked.Increment(ref completedStages) * 100 / FETCH_STAGES);
 
             async Task<List<TwitchEmote>> FetchThirdPartyEmotesAsync()
             {
@@ -726,24 +727,38 @@ namespace TwitchDownloaderCore
                 return bits;
             }
 
+            // Only json carries embedded GIFs, so an html download must not pay to fetch images it cannot keep
+            async Task<List<TwitchEmote>> FetchChatGifsAsync()
+            {
+                if (!downloadOptions.GiphyGifs || downloadOptions.DownloadFormat is not ChatFormat.Json)
+                {
+                    ReportStageComplete();
+                    return [];
+                }
+
+                return await DownloadGiphyGifs(chatRoot, cancellationToken, ReportFetchProgress, ReportStageComplete);
+            }
+
             var thirdPartyEmoteTask = FetchThirdPartyEmotesAsync();
             var firstPartyEmoteTask = FetchFirstPartyEmotesAsync();
             var chatBadgeTask = FetchChatBadgesAsync();
             var bitTask = FetchBitsAsync();
+            var chatGifTask = FetchChatGifsAsync();
 
-            await Task.WhenAll(thirdPartyEmoteTask, firstPartyEmoteTask, chatBadgeTask, bitTask);
+            await Task.WhenAll(thirdPartyEmoteTask, firstPartyEmoteTask, chatBadgeTask, bitTask, chatGifTask);
 
             List<TwitchEmote> thirdPartyEmotes = thirdPartyEmoteTask.Result;
             List<TwitchEmote> firstPartyEmotes = firstPartyEmoteTask.Result;
             List<ChatBadge> twitchBadges = chatBadgeTask.Result;
             List<CheerEmote> twitchBits = bitTask.Result;
+            List<TwitchEmote> chatGifs = chatGifTask.Result;
 
             if (reportProgress is null)
             {
                 _progress.SetTemplateStatus("Embedding Images {0}%", 0);
             }
 
-            var totalImageCount = thirdPartyEmotes.Count + firstPartyEmotes.Count + twitchBadges.Count + twitchBits.Count;
+            var totalImageCount = thirdPartyEmotes.Count + firstPartyEmotes.Count + twitchBadges.Count + twitchBits.Count + chatGifs.Count;
             var imagesProcessed = 0;
 
             foreach (TwitchEmote emote in thirdPartyEmotes)
@@ -820,6 +835,44 @@ namespace TwitchDownloaderCore
 
                 chatRoot.embeddedData.twitchBits.Add(newBit);
                 ReportEmbedProgress(++imagesProcessed * 100 / totalImageCount);
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            foreach (TwitchEmote gif in chatGifs)
+            {
+                var newGif = new EmbedEmoteData
+                {
+                    id = gif.Id,
+                    imageScale = 1,
+                    data = gif.ImageData,
+                    name = gif.Name,
+                    url = gif.Url,
+                    width = gif.Width,
+                    height = gif.Height,
+                };
+
+                chatRoot.embeddedData.gifs.Add(newGif);
+                gif.Dispose();
+                ReportEmbedProgress(++imagesProcessed * 100 / totalImageCount);
+            }
+        }
+
+        private async Task<List<TwitchEmote>> DownloadGiphyGifs(ChatRoot chatRoot, CancellationToken cancellationToken, Action<int> reportProgress = null, Action reportStageComplete = null)
+        {
+            try
+            {
+                var gifs = await TwitchHelper.GetGiphyGifs(chatRoot.comments, _cacheDir, _progress, reportProgress: reportProgress, cancellationToken: cancellationToken);
+                reportStageComplete?.Invoke();
+                return gifs;
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                // A broken Giphy must not cost the user the chat itself, but the stage still has to report
+                // so that a caller combining the stages cannot stall below 100%
+                reportStageComplete?.Invoke();
+                _progress.LogWarning($"Unable to resolve chat GIFs: {ex.Message} Continuing without them.");
+                return [];
             }
         }
 
