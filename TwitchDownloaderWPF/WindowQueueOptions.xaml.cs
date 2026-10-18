@@ -29,6 +29,7 @@ namespace TwitchDownloaderWPF
             InitializeComponent();
 
             textFolder.Text = Settings.Default.QueueFolder;
+            LoadChatEmbedOptions();
 
             TextPreferredQuality.Visibility = Visibility.Collapsed;
             ComboPreferredQuality.Visibility = Visibility.Collapsed;
@@ -113,6 +114,7 @@ namespace TwitchDownloaderWPF
             InitializeComponent();
 
             textFolder.Text = Settings.Default.QueueFolder;
+            LoadChatEmbedOptions();
 
             if (_dataList.Any(x => x.Id.All(char.IsDigit)))
             {
@@ -773,7 +775,7 @@ namespace TwitchDownloaderWPF
                 return;
 
             Settings.Default.QueueFolder = textFolder.Text;
-            Settings.Default.Save();
+            SettingsSaver.TrySave();
         }
 
         private void checkChat_Checked(object sender, RoutedEventArgs e)
@@ -879,6 +881,26 @@ namespace TwitchDownloaderWPF
             {
                 Settings.Default.PreferredQuality = preferredQuality;
             }
+        }
+
+        /// <summary>
+        /// Seeds the chat embed checkboxes from the saved settings, the same way the Chat Download page does,
+        /// so that queueing a chat download honours the user's emote and Giphy preferences instead of
+        /// silently falling back to "everything off except Giphy".
+        /// </summary>
+        private void LoadChatEmbedOptions()
+        {
+            checkEmbed.IsChecked = Settings.Default.ChatEmbedEmotes;
+            CheckBttvEmbed.IsChecked = Settings.Default.BTTVEmotes;
+            CheckFfzEmbed.IsChecked = Settings.Default.FFZEmotes;
+            CheckStvEmbed.IsChecked = Settings.Default.STVEmotes;
+            CheckGiphyGifs.IsChecked = Settings.Default.GiphyGifs;
+
+            // Assigning checkEmbed above raises CheckEmbed_CheckedChanged, which enables the emote boxes from
+            // checkEmbed alone. The Chat Download page additionally requires the chat download itself to be
+            // enabled, so recompute the combined state here and let checkChat_Checked/Unchecked keep it in sync.
+            var emoteEmbedEnabled = checkEmbed.IsChecked.GetValueOrDefault() && checkChat.IsChecked.GetValueOrDefault();
+            CheckBttvEmbed.IsEnabled = CheckFfzEmbed.IsEnabled = CheckStvEmbed.IsEnabled = CheckGiphyGifs.IsEnabled = emoteEmbedEnabled;
         }
 
         private void CheckEmbed_CheckedChanged(object sender, RoutedEventArgs e)

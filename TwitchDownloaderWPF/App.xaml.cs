@@ -32,6 +32,10 @@ namespace TwitchDownloaderWPF
             var windowsThemeService = new WindowsThemeService();
             ThemeServiceSingleton = new ThemeService(this, windowsThemeService);
 
+            // Apply the saved theme before the window is created. App.xaml merges the light HandyControl skin and
+            // light brushes, so swapping the theme after Show() painted a white window for a few seconds.
+            RequestAppThemeChange();
+
             MainWindow = new MainWindow
             {
                 WindowStartupLocation = WindowStartupLocation.CenterScreen
@@ -45,7 +49,7 @@ namespace TwitchDownloaderWPF
             {
                 Settings.Default.Upgrade();
                 Settings.Default.UpgradeRequired = false;
-                Settings.Default.Save();
+                SettingsSaver.TrySave();
             }
         }
 

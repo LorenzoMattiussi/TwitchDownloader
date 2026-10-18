@@ -384,7 +384,7 @@ namespace TwitchDownloaderWPF
             {
                 NumChatDownloadThreads.Value = Math.Clamp((int)NumChatDownloadThreads.Value, 1, 50);
                 Settings.Default.ChatDownloadThreads = (int)NumChatDownloadThreads.Value;
-                Settings.Default.Save();
+                SettingsSaver.TrySave();
             }
         }
 
@@ -393,7 +393,7 @@ namespace TwitchDownloaderWPF
             if (this.IsInitialized)
             {
                 Settings.Default.ChatEmbedEmotes = true;
-                Settings.Default.Save();
+                SettingsSaver.TrySave();
                 checkBttvEmbed.IsEnabled = true;
                 checkFfzEmbed.IsEnabled = true;
                 checkStvEmbed.IsEnabled = true;
@@ -406,7 +406,7 @@ namespace TwitchDownloaderWPF
             if (this.IsInitialized)
             {
                 Settings.Default.ChatEmbedEmotes = false;
-                Settings.Default.Save();
+                SettingsSaver.TrySave();
                 checkBttvEmbed.IsEnabled = false;
                 checkFfzEmbed.IsEnabled = false;
                 checkStvEmbed.IsEnabled = false;
@@ -419,7 +419,7 @@ namespace TwitchDownloaderWPF
             if (this.IsInitialized)
             {
                 Settings.Default.BTTVEmotes = true;
-                Settings.Default.Save();
+                SettingsSaver.TrySave();
             }
         }
 
@@ -428,7 +428,7 @@ namespace TwitchDownloaderWPF
             if (this.IsInitialized)
             {
                 Settings.Default.BTTVEmotes = false;
-                Settings.Default.Save();
+                SettingsSaver.TrySave();
             }
         }
 
@@ -437,7 +437,7 @@ namespace TwitchDownloaderWPF
             if (this.IsInitialized)
             {
                 Settings.Default.FFZEmotes = true;
-                Settings.Default.Save();
+                SettingsSaver.TrySave();
             }
         }
 
@@ -446,7 +446,7 @@ namespace TwitchDownloaderWPF
             if (this.IsInitialized)
             {
                 Settings.Default.FFZEmotes = false;
-                Settings.Default.Save();
+                SettingsSaver.TrySave();
             }
         }
 
@@ -455,7 +455,7 @@ namespace TwitchDownloaderWPF
             if (this.IsInitialized)
             {
                 Settings.Default.STVEmotes = true;
-                Settings.Default.Save();
+                SettingsSaver.TrySave();
             }
         }
 
@@ -464,7 +464,7 @@ namespace TwitchDownloaderWPF
             if (this.IsInitialized)
             {
                 Settings.Default.STVEmotes = false;
-                Settings.Default.Save();
+                SettingsSaver.TrySave();
             }
         }
 
@@ -473,7 +473,7 @@ namespace TwitchDownloaderWPF
             if (this.IsInitialized)
             {
                 Settings.Default.GiphyGifs = true;
-                Settings.Default.Save();
+                SettingsSaver.TrySave();
             }
         }
 
@@ -482,7 +482,7 @@ namespace TwitchDownloaderWPF
             if (this.IsInitialized)
             {
                 Settings.Default.GiphyGifs = false;
-                Settings.Default.Save();
+                SettingsSaver.TrySave();
             }
         }
 
@@ -499,7 +499,7 @@ namespace TwitchDownloaderWPF
                 textTrim.Margin = new Thickness(0, 10, 0, 33);
 
                 Settings.Default.ChatDownloadType = (int)ChatFormat.Json;
-                Settings.Default.Save();
+                SettingsSaver.TrySave();
             }
         }
 
@@ -516,7 +516,7 @@ namespace TwitchDownloaderWPF
                 textTrim.Margin = new Thickness(0, 17, 0, 33);
 
                 Settings.Default.ChatDownloadType = (int)ChatFormat.Html;
-                Settings.Default.Save();
+                SettingsSaver.TrySave();
             }
         }
 
@@ -533,7 +533,7 @@ namespace TwitchDownloaderWPF
                 textTrim.Margin = new Thickness(0, 10, 0, 36);
 
                 Settings.Default.ChatDownloadType = (int)ChatFormat.Text;
-                Settings.Default.Save();
+                SettingsSaver.TrySave();
             }
         }
 
@@ -676,7 +676,7 @@ namespace TwitchDownloaderWPF
                 return;
 
             Settings.Default.ChatJsonCompression = (int)ChatCompression.None;
-            Settings.Default.Save();
+            SettingsSaver.TrySave();
         }
 
         private void RadioCompressionGzip_OnCheckedChanged(object sender, RoutedEventArgs e)
@@ -685,7 +685,7 @@ namespace TwitchDownloaderWPF
                 return;
 
             Settings.Default.ChatJsonCompression = (int)ChatCompression.Gzip;
-            Settings.Default.Save();
+            SettingsSaver.TrySave();
         }
 
         private void RadioTimestampUTC_OnCheckedChanged(object sender, RoutedEventArgs e)
@@ -694,7 +694,7 @@ namespace TwitchDownloaderWPF
                 return;
 
             Settings.Default.ChatTextTimestampStyle = (int)TimestampFormat.Utc;
-            Settings.Default.Save();
+            SettingsSaver.TrySave();
         }
 
         private void RadioTimestampRelative_OnCheckedChanged(object sender, RoutedEventArgs e)
@@ -703,7 +703,7 @@ namespace TwitchDownloaderWPF
                 return;
 
             Settings.Default.ChatTextTimestampStyle = (int)TimestampFormat.Relative;
-            Settings.Default.Save();
+            SettingsSaver.TrySave();
         }
 
         private void RadioTimestampNone_OnCheckedChanged(object sender, RoutedEventArgs e)
@@ -712,7 +712,7 @@ namespace TwitchDownloaderWPF
                 return;
 
             Settings.Default.ChatTextTimestampStyle = (int)TimestampFormat.None;
-            Settings.Default.Save();
+            SettingsSaver.TrySave();
         }
     }
 }

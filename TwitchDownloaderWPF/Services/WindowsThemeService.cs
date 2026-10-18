@@ -34,20 +34,35 @@ namespace TwitchDownloaderWPF.Services
             Query = new EventQuery(windowsQuery);
             EventArrived += WindowsThemeService_EventArrived;
 
+            // Registering the watcher opens a WMI connection, which has been measured at 1.5-3.5 seconds on a
+            // cold start. The current theme is read straight from the registry, so the watcher is only needed
+            // for live theme changes and must not block the window from appearing.
+            _ = Task.Run(StartWatching);
+        }
+
+        private void StartWatching()
+        {
             try
             {
                 Start();
             }
             catch (ExternalException e)
             {
-                MessageBox.Show(string.Format(Translations.Strings.UnableToStartWindowsThemeWatcher, $"0x{e.ErrorCode:x8}"), Translations.Strings.MessageBoxTitleError,
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                ShowStartError(string.Format(Translations.Strings.UnableToStartWindowsThemeWatcher, $"0x{e.ErrorCode:x8}"));
             }
             catch (ManagementException e)
             {
-                MessageBox.Show(string.Format(Translations.Strings.UnableToStartWindowsThemeWatcher, $"{e.ErrorCode} (0x{(int)e.ErrorCode:x8})"), Translations.Strings.MessageBoxTitleError,
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                ShowStartError(string.Format(Translations.Strings.UnableToStartWindowsThemeWatcher, $"{e.ErrorCode} (0x{(int)e.ErrorCode:x8})"));
             }
+        }
+
+        private static void ShowStartError(string message)
+        {
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher is null || dispatcher.HasShutdownStarted)
+                return;
+
+            _ = dispatcher.InvokeAsync(() => MessageBox.Show(message, Translations.Strings.MessageBoxTitleError, MessageBoxButton.OK, MessageBoxImage.Information));
         }
 
         private void WindowsThemeService_EventArrived(object sender, EventArrivedEventArgs e)

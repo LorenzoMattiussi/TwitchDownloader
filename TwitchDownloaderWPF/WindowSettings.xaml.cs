@@ -212,7 +212,7 @@ namespace TwitchDownloaderWPF
             {
                 Settings.Default.Reset();
                 Settings.Default.UpgradeRequired = false;
-                Settings.Default.Save();
+                SettingsSaver.TrySave();
 
                 // TODO: Don't require restarting the application to apply
                 var commandLine = Environment.CommandLine;
@@ -252,7 +252,7 @@ namespace TwitchDownloaderWPF
         private void BtnSaveSettings_OnClick(object sender, RoutedEventArgs e)
         {
             _cancelSettingsChanges = false;
-            Settings.Default.Save();
+            SettingsSaver.TrySave();
             Close();
         }
 

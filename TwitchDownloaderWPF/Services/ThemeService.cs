@@ -54,7 +54,7 @@ namespace TwitchDownloaderWPF.Services
                     MessageBoxImage.Information);
 
                 Settings.Default.GuiTheme = "System";
-                Settings.Default.Save();
+                SettingsSaver.TrySave();
             }
         }
 
@@ -172,8 +172,21 @@ namespace TwitchDownloaderWPF.Services
 
         private void SetHandyControlTheme(SkinType newSkin)
         {
-            _wpfApplication.Resources.MergedDictionaries[0].Source = new Uri($"pack://application:,,,/HandyControl;component/Themes/Skin{newSkin}.xaml", UriKind.Absolute);
-            _wpfApplication.Resources.MergedDictionaries[1].Source = new Uri($"pack://application:,,,/HandyControl;component/Themes/Theme.xaml", UriKind.Absolute);
+            var skinSource = new Uri($"pack://application:,,,/HandyControl;component/Themes/Skin{newSkin}.xaml", UriKind.Absolute);
+            var themeSource = new Uri($"pack://application:,,,/HandyControl;component/Themes/Theme.xaml", UriKind.Absolute);
+            var dictionaries = _wpfApplication.Resources.MergedDictionaries;
+
+            // Re-assigning a source makes WPF re-parse the dictionary, which is expensive enough to be visible.
+            // When both dictionaries already point at the wanted skin there is nothing to do, and this call
+            // runs on every theme change, including the one at start-up.
+            if (dictionaries.Count > 1 && SourcesMatch(dictionaries[0].Source, skinSource) && SourcesMatch(dictionaries[1].Source, themeSource))
+                return;
+
+            dictionaries[0].Source = skinSource;
+            dictionaries[1].Source = themeSource;
         }
+
+        private static bool SourcesMatch(Uri current, Uri wanted)
+            => current is not null && string.Equals(current.OriginalString, wanted.OriginalString, StringComparison.OrdinalIgnoreCase);
     }
 }

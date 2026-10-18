@@ -23,6 +23,7 @@ using TwitchDownloaderWPF.Utils;
 using WpfAnimatedGif;
 using MessageBox = System.Windows.MessageBox;
 using TextBox = System.Windows.Controls.TextBox;
+using TwitchDownloaderWPF.Services;
 
 namespace TwitchDownloaderWPF
 {
@@ -358,7 +359,7 @@ namespace TwitchDownloaderWPF
                 Settings.Default.OutlineScale = double.Parse(textOutlineScale.Text, CultureInfo.CurrentCulture);
             }
             catch { }
-            Settings.Default.Save();
+            SettingsSaver.TrySave();
         }
 
         private bool ValidateInputs()
@@ -581,7 +582,7 @@ namespace TwitchDownloaderWPF
             }
 
             Settings.Default.FfmpegArguments = JsonSerializer.Serialize(args);
-            Settings.Default.Save();
+            SettingsSaver.TrySave();
         }
 
         private void LoadFfmpegArgs()

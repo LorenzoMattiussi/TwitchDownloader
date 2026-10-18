@@ -28,9 +28,18 @@ namespace TwitchDownloaderWPF
         public static PageChatRender pageChatRender = new PageChatRender();
         public static PageQueue pageQueue = new PageQueue();
 
+        // Despite not specifying a revision in the AssemblyVersion, the compiler still adds one. We don't want that.
+        private static Version CurrentVersion => Assembly.GetExecutingAssembly().GetName().Version!.StripRevisionIfDefault();
+
+        private bool _startupWorkStarted;
+
         public MainWindow()
         {
             InitializeComponent();
+
+            // Set the start-up page before the window is shown. Assigning it in Loaded left the first frames
+            // with an empty content area, which read as a blank window during start-up.
+            Main.Content = pageVodDownload;
         }
 
         private void btnVodDownload_Click(object sender, RoutedEventArgs e)
@@ -65,34 +74,40 @@ namespace TwitchDownloaderWPF
 
         private void Window_OnSourceInitialized(object sender, EventArgs e)
         {
-            App.RequestAppThemeChange();
+            App.RequestTitleBarChange();
         }
 
         [GeneratedRegex("{crop_(?=(?:start|end)(?:_|}))")]
         private static partial Regex OldCropParametersRegex { get; }
 
-        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            Main.Content = pageVodDownload;
-
             // Replace old crop parameters with new trim parameters
             Settings.Default.TemplateVod = OldCropParametersRegex.Replace(Settings.Default.TemplateVod, "{trim_");
             Settings.Default.TemplateClip = OldCropParametersRegex.Replace(Settings.Default.TemplateClip, "{trim_");
             Settings.Default.TemplateChat = OldCropParametersRegex.Replace(Settings.Default.TemplateChat, "{trim_");
-            Settings.Default.Save();
+            SettingsSaver.TrySave();
 
             // Flash the window taskbar icon if it is not in the foreground. This is to mitigate a problem where
             // it will sometimes start behind other windows, usually (but not always) due to the user's actions.
             FlashTaskbarIconIfNotForeground(TimeSpan.FromSeconds(3));
 
-            // Despite not specifying a revision in the AssemblyVersion, the compiler still adds one. We don't want that.
-            var currentVersion = Assembly.GetExecutingAssembly().GetName().Version!.StripRevisionIfDefault();
 #if DEBUG
-            Title = $"Twitch Downloader v{currentVersion} - DEBUG";
+            Title = $"Twitch Downloader v{CurrentVersion} - DEBUG";
 #else
-            Title = $"Twitch Downloader v{currentVersion}";
+            Title = $"Twitch Downloader v{CurrentVersion}";
 #endif
+        }
 
+        private async void Window_ContentRendered(object sender, EventArgs e)
+        {
+            if (_startupWorkStarted)
+                return;
+
+            _startupWorkStarted = true;
+
+            // Defer the FFmpeg check and the update check until the first frame is on screen, so neither can
+            // delay the window becoming usable.
             // TODO: extract FFmpeg handling to a dedicated service
             if (!File.Exists("ffmpeg.exe") || File.GetLastWriteTime("ffmpeg.exe") < DateTime.Now - TimeSpan.FromDays(365))
             {
@@ -122,7 +137,7 @@ namespace TwitchDownloaderWPF
                 Title = oldTitle;
             }
 
-            AutoUpdater.InstalledVersion = currentVersion;
+            AutoUpdater.InstalledVersion = CurrentVersion;
 #if !DEBUG
             if (AppContext.BaseDirectory.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)))
             {

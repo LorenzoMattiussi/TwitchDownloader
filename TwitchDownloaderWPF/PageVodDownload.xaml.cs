@@ -363,7 +363,7 @@ namespace TwitchDownloaderWPF
             if (this.IsInitialized && numDownloadThreads.IsEnabled)
             {
                 Settings.Default.VodDownloadThreads = (int)numDownloadThreads.Value;
-                Settings.Default.Save();
+                SettingsSaver.TrySave();
             }
         }
 
@@ -372,7 +372,7 @@ namespace TwitchDownloaderWPF
             if (this.IsInitialized)
             {
                 Settings.Default.OAuth = TextOauth.Text;
-                Settings.Default.Save();
+                SettingsSaver.TrySave();
             }
         }
 
@@ -573,7 +573,7 @@ namespace TwitchDownloaderWPF
             if (IsInitialized)
             {
                 Settings.Default.VodTrimMode = (int)VideoTrimMode.Safe;
-                Settings.Default.Save();
+                SettingsSaver.TrySave();
             }
         }
 
@@ -582,7 +582,7 @@ namespace TwitchDownloaderWPF
             if (IsInitialized)
             {
                 Settings.Default.VodTrimMode = (int)VideoTrimMode.Exact;
-                Settings.Default.Save();
+                SettingsSaver.TrySave();
             }
         }
     }

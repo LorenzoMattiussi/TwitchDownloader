@@ -478,7 +478,7 @@ namespace TwitchDownloaderWPF
             ComboChannel.Items.Add(_comboBoxItemClearChannels);
 
             Settings.Default.RecentChannels = recentChannels;
-            Settings.Default.Save();
+            SettingsSaver.TrySave();
         }
     }
 }

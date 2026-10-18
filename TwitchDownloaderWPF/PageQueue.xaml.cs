@@ -134,7 +134,7 @@ namespace TwitchDownloaderWPF
             if (this.IsInitialized)
             {
                 Settings.Default.LimitVod = (int)numVod.Value;
-                Settings.Default.Save();
+                SettingsSaver.TrySave();
             }
         }
 
@@ -143,7 +143,7 @@ namespace TwitchDownloaderWPF
             if (this.IsInitialized)
             {
                 Settings.Default.LimitClip = (int)numClip.Value;
-                Settings.Default.Save();
+                SettingsSaver.TrySave();
             }
         }
 
@@ -152,7 +152,7 @@ namespace TwitchDownloaderWPF
             if (this.IsInitialized)
             {
                 Settings.Default.LimitChat = (int)numChat.Value;
-                Settings.Default.Save();
+                SettingsSaver.TrySave();
             }
         }
 
@@ -161,7 +161,7 @@ namespace TwitchDownloaderWPF
             if (this.IsInitialized)
             {
                 Settings.Default.LimitRender = (int)numRender.Value;
-                Settings.Default.Save();
+                SettingsSaver.TrySave();
             }
         }
 

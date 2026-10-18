@@ -343,7 +343,7 @@ namespace TwitchDownloaderWPF
             if (IsInitialized)
             {
                 Settings.Default.EncodeClipMetadata = CheckMetadata.IsChecked!.Value;
-                Settings.Default.Save();
+                SettingsSaver.TrySave();
             }
         }
     }
