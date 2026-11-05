@@ -1,4 +1,4 @@
-﻿using AutoUpdaterDotNET;
+using AutoUpdaterDotNET;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -109,19 +109,23 @@ namespace TwitchDownloaderWPF
             // Defer the FFmpeg check and the update check until the first frame is on screen, so neither can
             // delay the window becoming usable.
             // TODO: extract FFmpeg handling to a dedicated service
-            if (!File.Exists("ffmpeg.exe") || File.GetLastWriteTime("ffmpeg.exe") < DateTime.Now - TimeSpan.FromDays(365))
+            // Resolve FFmpeg next to the executable rather than in the working directory. Process creation already
+            // searches the application directory for "ffmpeg.exe", but a relative File.Exists check does not, so a
+            // shortcut or `dotnet run` launch would silently re-download FFmpeg on every start.
+            var ffmpegPath = Path.Combine(AppContext.BaseDirectory, "ffmpeg.exe");
+            if (!File.Exists(ffmpegPath) || File.GetLastWriteTime(ffmpegPath) < DateTime.Now - TimeSpan.FromDays(365))
             {
                 var oldTitle = Title;
                 try
                 {
-                    await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Official, new FfmpegDownloadProgress());
+                    await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Official, AppContext.BaseDirectory, new FfmpegDownloadProgress());
 
                     // Flash the window to signify that FFmpeg has been downloaded
                     FlashTaskbarIconIfNotForeground(TimeSpan.FromSeconds(3));
                 }
                 catch (Exception ex)
                 {
-                    var messageBoxResult = MessageBox.Show(this, string.Format(Translations.Strings.UnableToDownloadFfmpegFull, "https://ffmpeg.org/download.html", Path.Combine(Environment.CurrentDirectory, "ffmpeg.exe")),
+                    var messageBoxResult = MessageBox.Show(this, string.Format(Translations.Strings.UnableToDownloadFfmpegFull, "https://ffmpeg.org/download.html", ffmpegPath),
                         Translations.Strings.UnableToDownloadFfmpeg, MessageBoxButton.OKCancel, MessageBoxImage.Information);
                     if (messageBoxResult == MessageBoxResult.OK)
                     {
@@ -144,7 +148,20 @@ namespace TwitchDownloaderWPF
                 // If the app is in user profile, the updater probably doesn't need administrator permissions
                 AutoUpdater.RunUpdateAsAdmin = false;
             }
-            AutoUpdater.Start("https://downloader-update.twitcharchives.workers.dev");
+            try
+            {
+                AutoUpdater.Start("https://downloader-update.twitcharchives.workers.dev");
+            }
+            catch (Exception ex)
+            {
+                // A failed update check must never take down start-up. The updater creates a temporary manifest
+                // file through WinForms theming, which throws UnauthorizedAccessException when %TEMP% is not
+                // writable for the process.
+                if (Settings.Default.VerboseErrors)
+                {
+                    MessageBox.Show(this, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
 #endif
         }
 
